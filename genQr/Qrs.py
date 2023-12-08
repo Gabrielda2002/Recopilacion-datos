@@ -1,6 +1,6 @@
 import qrcode;
 
-data = "Hola ";
+data = "Gabriel Duarte";
 
 qr = qrcode.QRCode(
       version=1,
@@ -14,4 +14,4 @@ qr.add_data(data)
 qr.make(fit=True)
 
 img = qr.make_image(fill_color="black", back_color = "white")
-img.save("qr1.png")
+img.save("Qr_Gabriel.png")
