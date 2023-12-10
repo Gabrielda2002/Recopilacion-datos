@@ -1,24 +1,24 @@
-function enviarFormulario() {
-    const formulario = document.getElementById('form-container');
-    const formData = new FormData(formulario);
 
-    const data = Array.from(formData).reduce((acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-    }, {});
+   async function enviarFormulario() {
+      const formData = new FormData(document.getElementById('form-container'));
+      const data = {};
+      formData.forEach((value, key) => {
+         data[key] = value;
+      });
 
+      try {
+         const response = await fetch('/guardar-formulario', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+         });
 
-    console.log('Datos a enviar: ', data);
-    fetch('http://localhost:8080/guardar-formulario', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => response.text())
-    .then(message => {
-        alert(message);
-    })
-    .catch(error => console.error('Error: ', error));
-}
+         const result = await response.text();
+         console.log(result);
+      } catch (error) {
+         console.error('Error al enviar el formulario:', error);
+      }
+   }
+

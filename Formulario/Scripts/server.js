@@ -1,47 +1,84 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const req = require('express/lib/request');
-const cors = require('cors');
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+const url = 'mongodb://localhost/proyecto_db'
 
-const app = express();
-const port = 3000;
+mongoose.connect(url, {
+    // useNewUrlParser:true,
+    // useUnifiedTopology: true
+    // useFindAndModify: false,
+    // useCreateIndex: true
+})
+.then( () => console.log("conectado a mongo"))
+.catch((e)=> console.log("error de conexcion "+ e))
 
-app.use(cors());
 
-mongoose.connect('mongodb://localhost:27017/proyecto_db', { useNewUrlParser: true, useUnifiedTopology: true });
+const EstududianteSchema = mongoose.Schema({
+    Nombre: String,
+    Apellido1: String,
+    Apellido2: String,
+    TipoDoc: String,
+    NumDoc: Number,
+    FechaNacimiento: Date,
+    Genero: String,
+    Numero: String,
+    EmailPer: String,
+    EmailInst: String,
+})
 
-const formSchema = new mongoose.Schema({
-    name: String,
-    lastName1: String,
-    lastName2: String,
-    typeDoc: String,
-    num_doc: Number,
-    Date: Date,
-    Gendere: String,
-    phoneNumber: String,
-    emailPer: String,
-    emailInst: String,
-});
+const estudianteModel = mongoose.model('Estudiante', EstududianteSchema)
 
-const Formulario = mongoose.model('formulario', formSchema);
+// mostrar
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const mostrar =async ()=>{
+    const estudiantes = await estudianteModel.find()
+    console.log(estudiantes)
+}
 
-app.post('/guardar-formulario', (req, res) => {
-    console.log('Solicitud post recibida', req.body)
-    const nuevoFormulario = new Formulario(req.body);
+// * crear
+const crear = async () =>{
+    const estudiante = new estudianteModel({
+        Nombre: req.body.name,
+         Apellido1: req.body.lastName1,
+         Apellido2: req.body.lastName2,
+         TipoDoc: req.body.typeDoc,
+         NumDoc: req.body.num_doc,
+         FechaNacimiento: req.body.Date,
+         Genero: req.body.Gendere,
+         Numero: req.body.phoneNumber,
+         EmailPer: req.body.emailPer,
+         EmailInst: req.body.emailInst,
+    }, {versionKey: false})
+    const resultado = await estudiante.save()
+    console.log(resultado);
+}
 
-    nuevoFormulario.save((err) => {
-        if (err) {
-            res.status(500).send('Error al guardar en la base de datos');
-        } else {
-            res.status(200).send('Datos guardados correctamente');
-        }
-    });
-});
+// actualizar
+const actualizar = async (id)=>{
+    const estudiante = await estudianteModel.updateOne({_id:id},
+        {
+            $set:{
+                Nombre: "Gabriel modificado"
+            }
+        })
+}
+const eliminar = async (id)=>{
+    const estudiante = await estudianteModel.deleteOne({_id:id})
+    console.log(estudiante);
+}
+// mostrar()
+// crear()
+// actualizar("6574a29b5169e9e4bf93492b")
+// eliminar("6574a6c19feb118459ed6119")
 
-app.listen(port, () => {
-    console.log("Servidor en ejecución en http://localhost:" + port);
-});
+// ... (código de conexión y definición de modelo)
+
+app.post('/guardar-formulario', async (req, res) => {
+    try {
+       const nuevoFormulario = await estudianteModel.create(req.body);
+       res.status(200).send('Datos guardados correctamente');
+    } catch (error) {
+       console.error('Error al guardar en la base de datos:', error);
+       res.status(500).send('Error al guardar en la base de datos');
+    }
+ });
+ 
